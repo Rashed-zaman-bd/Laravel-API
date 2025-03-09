@@ -11,37 +11,30 @@ class TaskController extends Controller
     function TaskCreate(Request $request){
 
         
-        $title=$request->input('title');
-        
-        
-        Task::create([
-            'title'=>$title,
-           
-            
-        ]);
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Post Successfully'
-        ],200);
+        $request->validate(['title' => 'required|string|max:255']);
+
+        $task = Task::create($request->all());
+
+        return response()->json($task, 201);
 }
 
 
 function TaskList(Request $request){
         
-    return Task::get();
+    return response()->json(Task::where('is_completed', false)->get());
 }
 
 
-function TaskUpdate(Request $request){
+function TaskUpdate(Request $request, $id){
 
  
-    $id=$request->header('id');
-    return Task::where('id',$id)->update([
-            'is_completed'=>$request->input('is_completed'),
-           
-        ]);
+    $task = Task::findOrFail($id);
+    $task->update(['is_completed' => $request->is_completed]);
+
+    return response()->json($task);
     
 }
 
 
 }
+
