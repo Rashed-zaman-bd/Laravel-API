@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Exception;
 
 class UserController extends Controller
@@ -12,18 +13,24 @@ class UserController extends Controller
 
         try {
             
-            $name=$request->input('name');
-            $email=$request->input('email');
-            $password=$request->input('password');
-            User::create([
-                'name'=>$name,
-                'email'=>$email,
-                'password'=>$password
+            $request->validate([
+                'name' => 'required|string|min:3',
+                'email' => 'required|email|unique:users',
+                'password' => 'required|min:8',
             ]);
+    
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+    
             return response()->json([
-                'status' => 'success',
-                'message' => 'User Registration Successfully'
-            ],200);
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at,
+            ], 201);
         }
 
         catch (Exception $e) {
@@ -33,9 +40,10 @@ class UserController extends Controller
     }
 
 
-    function UserByID(Request $request){
+    function UserByID(Request $request, $id){
 
-        $id = $request->input('id');
-        return User::where('id',$id)->first();
+        
+        return response()->json(User::findOrFail($id));
     }
 }
+
