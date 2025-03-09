@@ -10,31 +10,26 @@ class PostController extends Controller
     function PostCreate(Request $request){
 
         
-            $title=$request->input('title');
-            $content=$request->input('content');
-            
-            Post::create([
-                'title'=>$title,
-                'content'=>$content,
-                
-            ]);
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Post Successfully'
-            ],200);
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required',
+        ]);
+    
+        $post = Post::create($request->all());
+    
+        return response()->json($post, 201);
     }
 
 
     function PostList(Request $request){
         
-        return Post::get();
+        return response()->json(Post::all());
     }
 
 
-    function PostByID(Request $request){
+    function PostByID(Request $request, $id){
 
-        $id = $request->input('id');
-        return Post::where('id',$id)->first();
+        return response()->json(Post::findOrFail($id));
     }
 }
 
